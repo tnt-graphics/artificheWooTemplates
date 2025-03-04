@@ -106,6 +106,7 @@ if ( post_password_required() ) {
 	$currency           = get_woocommerce_currency_symbol();
 	$purchase_limit     = get_field( 'purchase_limit', 'option' );
 	$purchase_upper     = $purchase_limit + 1;
+	$preis_auf_anfrage_flag = get_field ('preis_auf_anfrage_flag');
 
 	switch ( $currency ) {
 		case 'CHF':
@@ -490,7 +491,16 @@ if ( post_password_required() ) {
 				?>
 				<?php echo $jahr_list_label; ?>
 				<?php echo $size_list_label_top . $size_list_label; ?>
-				<?php echo $price_list_label.$sale_discount_label.$sale_discount_price; ?>
+				<?php 
+				// new by rilana march 25 if flag is set auf anfrage
+				if ($preis_auf_anfrage_flag == 1) {
+					echo '<strong>' . __( 'Preisklasse:', 'artifiche' ) . '</strong> <span class="woocommerce-Price-amount amount">' . __( 'Auf Anfrage', 'artifiche' ) . '</span>';
+				} else {
+					echo $price_list_label . $sale_discount_label . $sale_discount_price;
+				}
+				?>
+
+			
 				
 				<?php
 				// $regular_price != 999999
@@ -500,14 +510,15 @@ if ( post_password_required() ) {
 			</p>
 			<?php $outer_class = ( $stock_status == 'outofstock' ) ? 'out-stock' : ''; ?>
 			<div class="prd-links <?php echo $outer_class . $order_wrap_cls; ?>">
-				<?php if ( ( ( $regular_price >= $purchase_upper ) && $internetpreis_flag == 0 ) || $stock_status == 'outofstock' ) { ?>
+				<?php if ( ( ( $regular_price >= $purchase_upper ) && $internetpreis_flag == 0 ) || $stock_status == 'outofstock' || $preis_auf_anfrage_flag == 1  ) { ?>
 					
 					<?php $kontakt_url = get_permalink( get_field( 'set_contact_page', 'option' ) ); ?>
 				<button class="btn-blue"><a class="btn-link" href="<?php echo $kontakt_url . '?pid=' . $post->ID; ?>"><i class="icon-arrow_big"></i> <?php echo __( 'Anfrage', 'artifiche' ); ?></a></button>
 					
-					<?php
+				<?php	
+					
 				}
-				if ( ( ( $regular_price <= $purchase_limit ) || $internetpreis_flag == 1 ) && $stock_status == 'instock' ) {
+				if ( ( ( $regular_price <= $purchase_limit ) || $internetpreis_flag == 1 ) && $stock_status == 'instock' && $preis_auf_anfrage_flag != 1  ) {
 					?>
 					<?php
 					global $product;
@@ -669,21 +680,27 @@ if ( post_password_required() ) {
 				if ( isset( $publikationen_name ) ) {
 					echo $publikationen_name;}
 				?>
-				<?php
-				if ( isset( $price_bt ) ) {
-					echo $price_bt;}
+				<?php 
+				// new by rilana march 25 if flag is set auf anfrage
+				if ($preis_auf_anfrage_flag == 1) {
+					echo '<li><strong class="list-title">' . __( 'Preisklasse:', 'artifiche' ) . '</strong> <span class="woocommerce-Price-amount amount">' . __( 'Auf Anfrage', 'artifiche' ) . '<br/></li>';
+				} else {
+					if ( isset( $price_bt ) ) {
+						echo $price_bt;
+					}
+				}
 				?>
-				
+			
 				</ul>
 				<div class="btn-wrap">
-			<?php if ( ( ( $regular_price >= $purchase_upper ) && $internetpreis_flag == 0 ) || $stock_status == 'outofstock' ) { ?>
+			<?php if ( ( ( $regular_price >= $purchase_upper ) && $internetpreis_flag == 0 ) || $stock_status == 'outofstock' || $preis_auf_anfrage_flag == 1  ) { ?>
 					<?php $kontakt_url = get_permalink( get_field( 'set_contact_page', 'option' ) ); ?>
 					<a href="<?php echo $kontakt_url . '?pid=' . $post->ID; ?>">
-				<button class="btn-blue"><i class="icon-arrow_big"></i> <?php echo __( 'Anfrage', 'artifiche' ); ?></button>
+				<button class="btn-blue"><a class="btn-link" href="<?php echo $kontakt_url . '?pid=' . $post->ID; ?>"><i class="icon-arrow_big"></i> <?php echo __( 'Anfrage', 'artifiche' ); ?></a></button>
 					</a>
 				<?php
 			}
-			if ( ( ( $regular_price <= $purchase_limit ) || $internetpreis_flag == 1 ) && $stock_status == 'instock' ) {
+			if ( ( ( $regular_price <= $purchase_limit ) || $internetpreis_flag == 1 ) && $stock_status == 'instock' && $preis_auf_anfrage_flag != 1  ) {
 				?>
 				<?php
 				global $product;
